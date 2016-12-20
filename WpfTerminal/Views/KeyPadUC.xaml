@@ -1,0 +1,127 @@
+﻿<UserControl x:Class="WpfTerminal.Views.KeyPadUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WpfTerminal.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    
+    <Grid x:Name="keyPadPress" 
+              VerticalAlignment="Center" 
+              Margin="5" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <Border 
+                BorderThickness="2" 
+                BorderBrush="Black" 
+                Grid.Row="0" 
+                Grid.ColumnSpan="4" 
+                HorizontalAlignment="Stretch" 
+                VerticalAlignment="Stretch" >
+                <TextBox x:Name="MosifonText" 
+                    BorderThickness="2" 
+                    Margin="5" 
+                    HorizontalAlignment="Stretch" 
+                    VerticalAlignment="Stretch" 
+                    Text="{Binding TerminalGUIScreen}" 
+                    IsEnabled="False" 
+                    TextAlignment="Center"/>
+            </Border>
+            <Button x:Name="btnF1"
+                    Grid.Column="0" 
+                    Grid.Row="1" 
+                    IsEnabled="{Binding IsConnectionSucceded}"
+                    Content="F1"/>
+            <Button x:Name="btnF2"
+                    Grid.Column="1" 
+                    Grid.Row="1" 
+                    IsEnabled="{Binding IsConnectionSucceded}"
+                    Content="F2"/>
+            <Button x:Name="btnF3"
+                    Grid.Column="2" 
+                    Grid.Row="1" 
+                    IsEnabled="{Binding IsConnectionSucceded}"
+                    Content="F3"/>
+            <Button x:Name="btnF4" 
+                    Grid.Column="3" 
+                    Grid.Row="1" 
+                    IsEnabled="{Binding IsConnectionSucceded}" 
+                    Content="F4"/>
+            <Button x:Name="MButton" 
+                    Grid.Column="0" 
+                    Grid.Row="2" 
+                    Command="{Binding TerminalGUIClickCommand}" 
+                    CommandParameter="m"
+                    IsEnabled="{Binding IsConnectionSucceded}" 
+                    Content="M"/>
+            <Button x:Name="BButton" 
+                    Grid.Column="1" 
+                    Grid.Row="2" 
+                    Command="{Binding TerminalGUIClickCommand}" 
+                    CommandParameter="b"
+                    IsEnabled="{Binding IsConnectionSucceded}" 
+                    Content="B"/>
+            <Button Grid.Column="2" Grid.Row="2" IsEnabled="{Binding IsConnectionSucceded}">??</Button>
+            <Button Grid.Column="3" Grid.Row="2" IsEnabled="{Binding IsConnectionSucceded}">??</Button>
+            <Button Grid.Column="0" Grid.Row="3" IsEnabled="{Binding IsConnectionSucceded}">??</Button>
+            <Button x:Name="UpButton" 
+                    Grid.Column="1" 
+                    Grid.Row="3" 
+                    FontFamily="Marlett" 
+                    Content="5" 
+                    Command="{Binding TerminalGUIClickCommand}" 
+                    CommandParameter="up"
+                    IsEnabled="{Binding IsConnectionSucceded}"/>
+            <Button Grid.Column="2" Grid.Row="3" IsEnabled="{Binding IsConnectionSucceded}">??</Button>
+            <Button Grid.Column="3" Grid.Row="3" IsEnabled="{Binding IsConnectionSucceded}">??</Button>
+            <Button x:Name="LeftButton" 
+                    Grid.Column="0" 
+                    Grid.Row="4" 
+                    FontFamily="Marlett" 
+                    Content="3" 
+                    Command="{Binding TerminalGUIClickCommand}" 
+                    CommandParameter="left"
+                    IsEnabled="{Binding IsConnectionSucceded}"/>
+            <Button x:Name="SButton" 
+                    Grid.Column="1" 
+                    Grid.Row="4" 
+                    Command="{Binding TerminalGUIClickCommand}" 
+                    CommandParameter="s"
+                    IsEnabled="{Binding IsConnectionSucceded}" Content="S"/>
+            <Button x:Name="RightButton" 
+                    Grid.Column="2" 
+                    Grid.Row="4" 
+                    FontFamily="Marlett" 
+                    Content="4" 
+                    Command="{Binding TerminalGUIClickCommand}" 
+                    CommandParameter="right"
+                    IsEnabled="{Binding IsConnectionSucceded}"/>
+            <Button Grid.Column="3" Grid.Row="4" IsEnabled="{Binding IsConnectionSucceded}">??</Button>
+            <Button Grid.Column="0" Grid.Row="5" IsEnabled="{Binding IsConnectionSucceded}">??</Button>
+            <Button x:Name="DownButton" 
+                    Grid.Column="1" 
+                    Grid.Row="5" 
+                    FontFamily="Marlett" 
+                    Content="6"
+                    Command="{Binding TerminalGUIClickCommand}" 
+                    CommandParameter="down"
+                    IsEnabled="{Binding IsConnectionSucceded}"/>
+            <Button Grid.Column="2" Grid.Row="5" IsEnabled="{Binding IsConnectionSucceded}">??</Button>
+            <Button Grid.Column="3" Grid.Row="5" IsEnabled="{Binding IsConnectionSucceded}">??</Button>
+        </Grid>
+
+
+</UserControl>

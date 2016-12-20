@@ -1,0 +1,123 @@
+﻿<Window x:Name="Terminal" x:Class="WpfTerminal.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfTerminal"
+        xmlns:ViewModel="clr-namespace:WpfTerminal.ViewModels"
+        xmlns:Converters="clr-namespace:WpfTerminal.Converters"
+        xmlns:Enums="clr-namespace:WpfTerminal.Enums"
+        xmlns:Views="clr-namespace:WpfTerminal.Views"
+        Title="Terminal" Height="400" Width="700" ResizeMode="NoResize" Visibility="Visible">
+    <Window.DataContext>
+        <ViewModel:MainViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/MainStyles.xaml"></ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+            <Converters:ReverseBool_ x:Key="BoolInverse"></Converters:ReverseBool_>
+            <Converters:DisableIfEmpty_ x:Key="DisableIfEmpty"></Converters:DisableIfEmpty_>
+            <Converters:BolleanToVisability x:Key="BooleanToVisabilityConvertor"></Converters:BolleanToVisability>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid x:Name="Layout">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="11*"/>
+            <RowDefinition Height="3*"/>
+        </Grid.RowDefinitions>
+        <Button x:Name="btnConnect"
+                Grid.Row="0" 
+                Grid.Column="1" 
+                Margin="5" 
+                VerticalAlignment="Center" 
+                Command="{Binding ConnectCommand}" CommandParameter="connect"
+                Content="{Binding Source={x:Static Enums:StringsText.Connect}}" 
+                IsEnabled="{Binding IsConnectionSucceded,Converter={StaticResource BoolInverse}}"
+                />
+        <Button x:Name="btnDisconnect"
+                Grid.Row="0" 
+                Grid.Column="2" 
+                Margin="5" 
+                VerticalAlignment="Center" 
+                Command="{Binding DisConnectCommand}" 
+                IsEnabled="{Binding IsConnectionSucceded}"
+                Content="{Binding Source={x:Static Enums:StringsText.Disconnect}}"
+                />
+        <Button x:Name="ExitButton" 
+                Grid.Row="2" 
+                Grid.Column="2" 
+                Margin="5" 
+                VerticalAlignment="Center" 
+                Command="{Binding ExitCommand}"
+                Content="{Binding Source={x:Static Enums:StringsText.Exit}}" />
+        <Grid Grid.Row="2" Margin="0,2,2,2">
+            <Grid.RowDefinitions>
+                <RowDefinition ></RowDefinition>
+            </Grid.RowDefinitions>
+            <GroupBox HorizontalAlignment="Stretch">
+                <GroupBox.Header>
+                    <TextBlock Height="18" Text="{Binding Source={x:Static Enums:StringsText.LogSettings}}" TextAlignment="Center" VerticalAlignment="Top"/>
+                </GroupBox.Header>
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="btnClearLog" 
+                        Grid.Column="0" 
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Center" 
+                        Command="{Binding ClearScreen}" 
+                        IsEnabled="{Binding LogText,Converter={StaticResource DisableIfEmpty}}"
+                        Content="{Binding Source={x:Static Enums:StringsText.ClearLog}}"/>
+
+                    <Button x:Name="Export" 
+                        Grid.Column="1" 
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Center" 
+                        Command="{Binding ExportClickCommand}" 
+                        IsEnabled="{Binding LogText,Converter={StaticResource DisableIfEmpty}}"
+                        Content="{Binding Source={x:Static Enums:StringsText.Export}}"/>
+
+                </Grid>
+            </GroupBox>
+        </Grid>
+        <GroupBox Grid.Row="0" Grid.RowSpan="2">
+            <GroupBox.Header>
+                <TextBlock Height="18"  Text="Log" TextAlignment="Center"></TextBlock>
+            </GroupBox.Header>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"></RowDefinition>
+                    <RowDefinition Height="10*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Border Background="#f4f4f4" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Row="0">
+                    <ToggleButton Margin="1"
+                            x:Name="logToggleButton" 
+                            Grid.Row="1"
+                            Style="{StaticResource AnimatedSwitch}" 
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center" 
+                            BorderBrush="Black"/>
+                </Border>
+                <ScrollViewer  HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" Grid.Row="1">
+                <TextBox x:Name="LogText"
+                            TextWrapping="Wrap"
+                            Text="{Binding LogText,UpdateSourceTrigger=PropertyChanged}"
+                            IsEnabled="False"
+                            Background="Transparent" 
+                            Visibility="{Binding IsChecked,ElementName=logToggleButton,Converter={StaticResource BooleanToVisabilityConvertor}}"/>
+            </ScrollViewer>
+            </Grid>
+        </GroupBox>
+        <Views:KeyPadUC Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"/>
+    </Grid>
+</Window>

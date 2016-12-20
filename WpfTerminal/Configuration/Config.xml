@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <TerminalPreferences>
+    <Field Name="IPAddress">127.0.0.1</Field>
+    <Field Name="Port">COM3</Field>
+    <Field Name="BaudRate">9600</Field><!--300,600,1200,2400,4800,9600,19200 -->
+    <Field Name="Parity">None</Field><!--Even,odd,Mark,Space,None,Ignore-->
+    <Field Name="StopBits">One</Field><!--1,2-->
+    <Field Name="DataBits">8</Field><!--7,8-->
+    <Field Name="Handshake">Disable</Field><!--Enable,Disable-->
+    <Field Name="ReadTimeout">2000</Field>
+    <Field Name="WriteTimeout">500</Field>
+    <Field Name="DtrEnable">true</Field><!--True,False-->
+    <Field Name="RtsEnable">true</Field><!--True,False-->
+    <Field Name="DisplayPE">Enable</Field><!--Enable,Disable-->
+    <Field Name="Repeat">Medium</Field> <!--Slow,Medium,Fast,Disabled-->
+    <Field Name="KeyClick">Disable</Field><!--Enable,Disable-->
+    <Field Name="KNPFunction">Disable</Field><!--Enable,Disable-->
+    <Field Name="Curser">Enable</Field><!--Enable,Disable-->
+    <Field Name="CurserBlink">Enable</Field><!--Enable,Disable-->
+    <Field Name="XON_XOFF">Disable</Field><!--Enable,Disable-->
+    <Field Name="ECHO">Disable</Field><!--Enable,Disable-->
+    <Field Name="EscapeMode">ANSI</Field><!--ANSI,Private-->
+    <Field Name="CR_LF_Mode">Normal</Field><!--Normal,NewLine-->
+    <Field Name="Test">Disable</Field><!--Enable,Disable-->
+    <Field Name="ShiftLock">Disable</Field><!--Enable,Disable-->
+    <Field Name="ScrollOn">0</Field><!--0=(LastChar),1=(LastChar+1)-->
+    <Field Name="ViewingAngle">8</Field><!--(min)1-8(max)-->
+    <Field Name="BreakCommand">0</Field><!--0=(LastChar),1=(LastChar+1)-->
+    <Field Name="BackLight">On</Field><!--On,Time,Off-->
+  </TerminalPreferences>
+  <TerminalButtons>
+    <Field Name="1">M</Field>
+    <Field Name="2">B</Field>
+    <Field Name="3">??</Field>
+    <Field Name="4">??</Field>
+    <Field Name="5">Up</Field>
+    <Field Name="6">??</Field>
+    <Field Name="7">Left</Field>
+    <Field Name="8">S</Field>
+    <Field Name="9">Right</Field>
+    <Field Name="0">Down</Field>
+  </TerminalButtons>
+  <TerminalData>
+    <Field Name="StepSize">5</Field>
+  </TerminalData>
+</root>
