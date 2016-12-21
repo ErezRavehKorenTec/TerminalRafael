@@ -30,18 +30,19 @@
     <Field Name="BackLight">On</Field><!--On,Time,Off-->
   </TerminalPreferences>
   <TerminalButtons>
-    <Field Name="1">M</Field>
-    <Field Name="2">B</Field>
+    <Field Name="1">??</Field>
+    <Field Name="2">Up</Field>
     <Field Name="3">??</Field>
-    <Field Name="4">??</Field>
-    <Field Name="5">Up</Field>
-    <Field Name="6">??</Field>
-    <Field Name="7">Left</Field>
-    <Field Name="8">S</Field>
-    <Field Name="9">Right</Field>
-    <Field Name="0">Down</Field>
+    <Field Name="4">Left</Field>
+    <Field Name="5">??</Field>
+    <Field Name="6">Right</Field>
+    <Field Name="7">??</Field>
+    <Field Name="8">Down</Field>
+    <Field Name="9">??</Field>
+    <Field Name="0">??</Field>
   </TerminalButtons>
   <TerminalData>
-    <Field Name="StepSize">5</Field>
+    <Field Name="Fine">10</Field>
+    <Field Name="Coarse">50</Field>
   </TerminalData>
 </root>
