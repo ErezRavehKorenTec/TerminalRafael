@@ -11,12 +11,15 @@ namespace WpfTerminal.BL
     public class ConnectionHandler
     {
         #region params
+
+        //BG - both variables should be capitalized
         private SerialPort mySerialPort;
         private readonly int _configStepSize;
         public event EventHandler TerminalClickRecive;
         #endregion
 
         #region Properties
+        //BG  typo - Succeeded
         public bool ConnectionSucceded { get; set; }
         public int TerminalStepSize { get; set; }
         public Dictionary<string, string> TerminalParameters { get; set; }
@@ -31,6 +34,7 @@ namespace WpfTerminal.BL
         }
         #endregion
 
+        //BG - I think the name of the method should be something like InitRS232Connection
         #region Methods
         private void SettingRS232()
         {
@@ -63,10 +67,16 @@ namespace WpfTerminal.BL
                 ConnectionSucceded = false;
                 string exceptionMessage = string.Empty;
                 exceptionMessage = e.Message.Contains('(') ? e.Message : e.Message + " (ConnectionHandler)";
+
+                //BG - rethrowing exception here is a bad idea we don't want the system to crush when the terminal couldn't connect (you also calling this in a constructor)
+                // better way is to return bool and the caller is free to ignore it
                 throw new Exception(exceptionMessage);
             }
 
         }
+
+        //BG - Try to avoid acronyms in method names
+        //BG -  Anway this method can be substituted by Enum.Parse
         private Handshake SetHS(string v)
         {
             switch (v.ToLower())
@@ -83,6 +93,8 @@ namespace WpfTerminal.BL
                     return Handshake.None;
             }
         }
+
+        //BG - same thing here
         private StopBits SetStopBit(string v)
         {
             switch (v.ToLower())
@@ -99,6 +111,7 @@ namespace WpfTerminal.BL
                     return StopBits.None;
             }
         }
+        //BG - same thing here
         private Parity SetParity(string v)
         {
             switch (v.ToLower())
@@ -117,6 +130,8 @@ namespace WpfTerminal.BL
                     return Parity.None;
             }
         }
+
+
         public void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort sp = (SerialPort)sender;
@@ -189,6 +204,8 @@ namespace WpfTerminal.BL
                     }
             }
         }
+
+        //BG - typo - Cursor
         private void MoveCurser(string v)
         {
             if (mySerialPort != null && mySerialPort.IsOpen)
@@ -197,6 +214,7 @@ namespace WpfTerminal.BL
             {
                 case "a":
                     {
+                            //BG - please put these in constants with a meaningful name
                             mySerialPort.Write(new byte[] { 0x1B, 0x5B, 0x41 },0,3);
                             break;
 
@@ -222,6 +240,8 @@ namespace WpfTerminal.BL
                 }
             }
         }
+
+        //BG - typo Write
         public void WritToTerminalScreen(string value)
         {
             if (mySerialPort != null && mySerialPort.IsOpen)
@@ -241,6 +261,8 @@ namespace WpfTerminal.BL
                 TerminalClickRecive(value, null);
             }
         }
+
+        //BG - typo Write, plese avoid using hebrew in names - WriteToTerminalScreenFromUI
         public void WritToMusafonScreenFromGUI(string value)
         {
             if (mySerialPort != null && mySerialPort.IsOpen)
@@ -248,6 +270,7 @@ namespace WpfTerminal.BL
                 mySerialPort.Write(Environment.NewLine + value);
             }
         }
+
         public bool Disconnect()
         {
             try

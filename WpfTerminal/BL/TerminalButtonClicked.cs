@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace WpfTerminal.BL
 {
+    //BG - sIf this is obsolete just delete it
     [Obsolete]
     public class TerminalButtonClicked
     {
