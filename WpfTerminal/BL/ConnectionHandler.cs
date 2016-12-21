@@ -12,14 +12,17 @@ namespace WpfTerminal.BL
     {
         #region params
 
-        //BG - both variables should be capitalized
-        public const string _firstlinedisplay = "B: ";
-        public const string _secondlinedisplay = "M: ";
-        public const string _thirdlinedisplay = "Step: ";
 
-        private SerialPort mySerialPort;
-        //private readonly int _configStepSize;
+        public const string FIRST_LINE_DISPLAY = "B: ";
+        public const string SECOND_LINE_DISPLAY = "M: ";
+        public const string THIRD_LINE_DISPLAY = "Step: ";
+        private static readonly byte[] MOVE_CURSER_UP = new byte[] { 0x1B, 0x5B, 0x41 };
+        private static readonly byte[] MOVE_CURSER_DOWN = new byte[] { 0x1B, 0x5B, 0x42 };
+        private SerialPort _mySerialPort;
         public event EventHandler TerminalClickRecive;
+        private int _bIndex = 0;
+        private int _mIndex = 0;
+        DummyInstrument test;
         #endregion
 
         #region Properties
@@ -30,24 +33,12 @@ namespace WpfTerminal.BL
             get { return _curserLine; }
             set { _curserLine = value; }
         }
+        public List<string> MSelection { get; set; }
+        public List<string> BSelection { get; set; }
 
-        private Enums.BSelection _bSelection = (Enums.BSelection)1;
+        private StepSize _stepSelection = (StepSize)0;
 
-        public Enums.BSelection SelectedB
-        {
-            get { return _bSelection; }
-            set { _bSelection = value; }
-        }
-        private Enums.MSelection _mSelection = (Enums.MSelection)1;
-
-        public Enums.MSelection SelectedM
-        {
-            get { return _mSelection; }
-            set { _mSelection = value; }
-        }
-        private Step _stepSelection = (Enums.Step)1;
-
-        public Step SelectedStep
+        public StepSize SelectedStep
         {
             get { return _stepSelection; }
             set { _stepSelection = value; }
@@ -58,38 +49,68 @@ namespace WpfTerminal.BL
         #endregion
 
         #region ctor
-        public ConnectionHandler()
-        {
-            SettingRS232();
-            DummyInstrument test = new DummyInstrument();
-        }
+        public ConnectionHandler() { }
+
         #endregion
 
-        //BG - I think the name of the method should be something like InitRS232Connection
         #region Methods
-        private void SettingRS232()
+        public void Init()
+        {
+            test = new DummyInstrument();
+            BSelection = test.GetB();
+            MSelection = test.GetM(BSelection.First());
+            test.Axis = new Dictionary<Axis, int>() { { Axis.X, 0 }, { Axis.Y, 0 } };
+            InitRS232Connection();
+        }
+
+        private void InitRS232Connection()
         {
             try
             {
                 TerminalParameters = Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalPreferences);
 
-                mySerialPort = new SerialPort(TerminalParameters["Port"]);
-                mySerialPort.BaudRate = Int16.Parse(TerminalParameters["BaudRate"]);
-                mySerialPort.DataBits = Int16.Parse(TerminalParameters["DataBits"]);
-                mySerialPort.Parity = SetParity(TerminalParameters["Parity"]);
-                mySerialPort.StopBits = SetStopBit(TerminalParameters["StopBits"]);
+                _mySerialPort = new SerialPort(TerminalParameters["Port"]);
+                _mySerialPort.BaudRate = Int16.Parse(TerminalParameters["BaudRate"]);
+                _mySerialPort.DataBits = Int16.Parse(TerminalParameters["DataBits"]);
 
 
+                Parity _tempParity;
+                if (Enum.TryParse<Parity>(TerminalParameters["Parity"], out _tempParity))
+                {
+                    _mySerialPort.Parity = _tempParity;
+                }
+                else
+                {
+                    _mySerialPort.Parity = Parity.None;
+                }
+                StopBits _tempStopBits;
+                if (Enum.TryParse<StopBits>(TerminalParameters["StopBits"], out _tempStopBits))
+                {
+                    _mySerialPort.StopBits = _tempStopBits;
+                }
+                else
+                {
+                    _mySerialPort.StopBits = StopBits.None;
+                }
 
-                mySerialPort.Handshake = SetHS(TerminalParameters["Handshake"]);
-                mySerialPort.ReadTimeout = Int16.Parse(TerminalParameters["ReadTimeout"]);
-                mySerialPort.WriteTimeout = Int16.Parse(TerminalParameters["WriteTimeout"]);
 
-                mySerialPort.DtrEnable = bool.Parse(TerminalParameters["DtrEnable"]);
-                mySerialPort.RtsEnable = bool.Parse(TerminalParameters["RtsEnable"]);
-                mySerialPort.Open();
+                Handshake _tempHandShake;
+                if (Enum.TryParse<Handshake>(TerminalParameters["Handshake"], out _tempHandShake)) //SetHandShake(TerminalParameters["Handshake"]);
+                {
+                    _mySerialPort.Handshake = _tempHandShake;
+                }
+                else
+                {
+                    _mySerialPort.Handshake = Handshake.None;
+                }
+                _mySerialPort.ReadTimeout = Int16.Parse(TerminalParameters["ReadTimeout"]);
+                _mySerialPort.WriteTimeout = Int16.Parse(TerminalParameters["WriteTimeout"]);
+
+                _mySerialPort.DtrEnable = bool.Parse(TerminalParameters["DtrEnable"]);
+                _mySerialPort.RtsEnable = bool.Parse(TerminalParameters["RtsEnable"]);
+                _mySerialPort.Open();
                 WriteToTerminalScreen(string.Empty);
-                mySerialPort.DataReceived += DataReceivedHandler;
+                _mySerialPort.DataReceived += DataReceivedHandler;
 
                 ConnectionSucceded = true;
             }
@@ -99,70 +120,9 @@ namespace WpfTerminal.BL
                 ConnectionSucceded = false;
                 string exceptionMessage = string.Empty;
                 exceptionMessage = e.Message.Contains('(') ? e.Message : e.Message + " (ConnectionHandler)";
-
-                //BG - rethrowing exception here is a bad idea we don't want the system to crush when the terminal couldn't connect (you also calling this in a constructor)
-                // better way is to return bool and the caller is free to ignore it
-                throw new Exception(exceptionMessage);
             }
 
         }
-
-        //BG - Try to avoid acronyms in method names
-        //BG -  Anway this method can be substituted by Enum.Parse
-        private Handshake SetHS(string v)
-        {
-            switch (v.ToLower())
-            {
-                case "none":
-                    return Handshake.None;
-                case "requesttosend":
-                    return Handshake.RequestToSend;
-                case "requesttosendxonxoff":
-                    return Handshake.RequestToSendXOnXOff;
-                case "xonxoff":
-                    return Handshake.XOnXOff;
-                default:
-                    return Handshake.None;
-            }
-        }
-
-        //BG - same thing here
-        private StopBits SetStopBit(string v)
-        {
-            switch (v.ToLower())
-            {
-                case "none":
-                    return StopBits.None;
-                case "one":
-                    return StopBits.One;
-                case "onepointfive":
-                    return StopBits.OnePointFive;
-                case "two":
-                    return StopBits.Two;
-                default:
-                    return StopBits.None;
-            }
-        }
-        //BG - same thing here
-        private Parity SetParity(string v)
-        {
-            switch (v.ToLower())
-            {
-                case "even":
-                    return Parity.Even;
-                case "mark":
-                    return Parity.Mark;
-                case "none":
-                    return Parity.None;
-                case "odd":
-                    return Parity.Odd;
-                case "space":
-                    return Parity.Space;
-                default:
-                    return Parity.None;
-            }
-        }
-
 
         public void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
@@ -174,21 +134,29 @@ namespace WpfTerminal.BL
                 case "2":
                     {
                         WriteToTerminalScreen(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalButtons)["2"]);
+                        test.Axis[Axis.Y]++;
+                        test.Move(test.Axis, SelectedStep, MSelection[_mIndex], BSelection[_bIndex]);
                         break;
                     }
                 case "4":
                     {
                         WriteToTerminalScreen(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalButtons)["4"]);
+                        test.Axis[Axis.X]--;
+                        test.Move(test.Axis, SelectedStep, MSelection[_mIndex], BSelection[_bIndex]);
                         break;
                     }
                 case "6":
                     {
                         WriteToTerminalScreen(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalButtons)["6"]);
+                        test.Axis[Axis.X]++;
+                        test.Move(test.Axis, SelectedStep, MSelection[_mIndex], BSelection[_bIndex]);
                         break;
                     }
                 case "8":
                     {
                         WriteToTerminalScreen(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalButtons)["8"]);
+                        test.Axis[Axis.Y]--;
+                        test.Move(test.Axis, SelectedStep, MSelection[_mIndex], BSelection[_bIndex]);
                         break;
                     }
                 //curser move on screen
@@ -197,7 +165,7 @@ namespace WpfTerminal.BL
                 case "c":
                 case "d":
                     {
-                        MoveCurser(indata.ToLower());
+                        MoveCursor(indata.ToLower());
                         break;
                     }
                 //confirm selection
@@ -214,19 +182,31 @@ namespace WpfTerminal.BL
             }
         }
 
-        //BG - typo - Cursor
-        private void MoveCurser(string v)
+        private void MoveCursor(string v)
         {
-            if (mySerialPort != null && mySerialPort.IsOpen)
+            if (_mySerialPort != null && _mySerialPort.IsOpen)
             {
                 switch (v)
                 {
                     //Move Up
                     case "a":
                         {
-                            if (CurserLine > 1)
+                            //if first row and press up go to last row
+                            if (CurserLine == 1)
+                            {
+                                CurserLine = 4;
+                                for (int i = 0; i < 4; i++)
+                                {
+                                    _mySerialPort.Write(MOVE_CURSER_DOWN, 0, 3);
+                                }
+                            }
+                            else// (CurserLine > 1)
+                            {
                                 CurserLine--;
-                            mySerialPort.Write(new byte[] { 0x1B, 0x5B, 0x41 }, 0, 3);
+                                _mySerialPort.Write(new byte[] { 0x1B, 0x5B, 0x41 }, 0, 3);
+                            }
+
+
                             break;
 
                         }
@@ -259,9 +239,19 @@ namespace WpfTerminal.BL
                     //Move Down
                     case "d":
                         {
-                            if (CurserLine < 5)
+                            if (CurserLine == 4)
+                            {
+                                CurserLine = 1;
+                                for (int i = 0; i < 4; i++)
+                                {
+                                    _mySerialPort.Write(MOVE_CURSER_UP, 0, 3);
+                                }
+                            }
+                            else// (CurserLine < 4)
+                            {
                                 CurserLine++;
-                            mySerialPort.Write(new byte[] { 0x1B, 0x5B, 0x42 }, 0, 3);
+                                _mySerialPort.Write(MOVE_CURSER_DOWN, 0, 3);
+                            }
                             break;
 
                         }
@@ -277,30 +267,33 @@ namespace WpfTerminal.BL
                 {
                     case 1:
                         {
-                            if (SelectedB == (BSelection)1)
+
+                            if (_bIndex == 0)
                             {
-                                SelectedB = Enum.GetValues(typeof(BSelection)).Cast<BSelection>().Last();
+                                _bIndex = BSelection.Count - 1;
+                                //need to change m list according to b selection
                             }
                             else
-                                SelectedB--;
+                                _bIndex--;
+                            //need to change m list according to b selection
                             break;
                         }
                     case 2:
                         {
-                            if (SelectedM == (MSelection)1)
+                            if (_mIndex == 0)
                             {
-                                SelectedM = Enum.GetValues(typeof(MSelection)).Cast<MSelection>().Last();
+                                _mIndex = MSelection.Count - 1;
                             }
                             else
-                                SelectedM--;
+                                _mIndex--;
                             break;
                         }
                     case 3:
                         {
-                            if (SelectedStep == (Step)1)
-                                SelectedStep = (Step)2;
+                            if (SelectedStep == (StepSize)0)
+                                SelectedStep = (StepSize)1;
                             else
-                                SelectedStep = (Step)1;
+                                SelectedStep = (StepSize)0;
                             break;
                         }
                 }
@@ -311,36 +304,37 @@ namespace WpfTerminal.BL
                 {
                     case 1:
                         {
-                            if (SelectedB == Enum.GetValues(typeof(BSelection)).Cast<BSelection>().Last())
+                            if (_bIndex == BSelection.Count - 1)
                             {
-                                SelectedB = Enum.GetValues(typeof(BSelection)).Cast<BSelection>().First();
+                                _bIndex = 0;
+                                //need to change m list according to b selection
                             }
                             else
-                                SelectedB++;
+                                _bIndex++;
+                            //need to change m list according to b selection
                             break;
                         }
                     case 2:
                         {
-                            if (SelectedM == Enum.GetValues(typeof(MSelection)).Cast<MSelection>().Last())
+                            if (_mIndex == MSelection.Count - 1)
                             {
-                                SelectedM = Enum.GetValues(typeof(MSelection)).Cast<MSelection>().First();
+                                _mIndex = 0;
                             }
                             else
-                                SelectedM++;
+                                _mIndex++;
                             break;
                         }
                     case 3:
                         {
-                            if (SelectedStep == (Step)1)
-                                SelectedStep = (Step)2;
+                            if (SelectedStep == (StepSize)0)
+                                SelectedStep = (StepSize)1;
                             else
-                                SelectedStep = (Step)1;
+                                SelectedStep = (StepSize)0;
                             break;
                         }
                 }
             }
             WriteToTerminalScreen(string.Empty);
-            // _firstlinedisplay + SelectedB.ToString() + Environment.NewLine + _secondlinedisplay + SelectedM.ToString() + Environment.NewLine + _thirdlinedisplay + SelectedStep.ToString()+Environment.NewLine);
         }
         private void WriteToTerminalScreen(string input)
         {
@@ -348,50 +342,45 @@ namespace WpfTerminal.BL
             ClearScreen();
             if (input.Equals(string.Empty))
             {
-                value = _firstlinedisplay + SelectedB.ToString() + Environment.NewLine + _secondlinedisplay + SelectedM.ToString() + Environment.NewLine + _thirdlinedisplay + SelectedStep.ToString() + Environment.NewLine + "Confirm ?";
-                mySerialPort.Write(value);
+                value = FIRST_LINE_DISPLAY + BSelection[_bIndex].ToString() + Environment.NewLine + SECOND_LINE_DISPLAY + MSelection[_mIndex].ToString() + Environment.NewLine + THIRD_LINE_DISPLAY + SelectedStep.ToString() + Environment.NewLine + "Confirm ?";
+                _mySerialPort.Write(value);
             }
             else if (input.ToLower().Equals("confirm"))
             {
-                value = _firstlinedisplay + SelectedB.ToString() + Environment.NewLine + _secondlinedisplay + SelectedM.ToString() + Environment.NewLine + _thirdlinedisplay + SelectedStep.ToString() + Environment.NewLine;
-                mySerialPort.Write(value);
+                value = FIRST_LINE_DISPLAY + BSelection[_bIndex].ToString() + Environment.NewLine + SECOND_LINE_DISPLAY + MSelection[_mIndex].ToString() + Environment.NewLine + THIRD_LINE_DISPLAY + SelectedStep.ToString() + Environment.NewLine;
+                _mySerialPort.Write(value);
             }
             else
             {
-                value = _firstlinedisplay + SelectedB.ToString() + Environment.NewLine + _secondlinedisplay + SelectedM.ToString() + Environment.NewLine + _thirdlinedisplay + SelectedStep.ToString() + Environment.NewLine + input;
-                mySerialPort.Write(value);
+                value = FIRST_LINE_DISPLAY + BSelection[_bIndex].ToString() + Environment.NewLine + SECOND_LINE_DISPLAY + MSelection[_mIndex].ToString() + Environment.NewLine + THIRD_LINE_DISPLAY + SelectedStep.ToString() + Environment.NewLine + input;
+                _mySerialPort.Write(value);
             }
             CurserLine = 4;
-            if(TerminalClickRecive!=null)
+            if (TerminalClickRecive != null)
                 TerminalClickRecive(value, null);
         }
 
         private void ClearScreen()
         {
-            mySerialPort.Write(Environment.NewLine + Environment.NewLine + Environment.NewLine + Environment.NewLine);
+            _mySerialPort.Write(Environment.NewLine + Environment.NewLine + Environment.NewLine + Environment.NewLine);
             CurserLine = 4;
         }
 
-        //BG - typo Write, plese avoid using hebrew in names - WriteToTerminalScreenFromUI
-        public void WritToMusafonScreenFromGUI(string value)
+        public void WriteToMusafonScreenFromGUI(string value)
         {
-            if (mySerialPort != null && mySerialPort.IsOpen)
+            if (_mySerialPort != null && _mySerialPort.IsOpen)
             {
-                mySerialPort.Write(Environment.NewLine + value);
+                _mySerialPort.Write(Environment.NewLine + value);
             }
         }
 
         public bool Disconnect()
         {
-            try
+            if (_mySerialPort.IsOpen)
             {
                 ClearScreen();
-                mySerialPort.Write(Environment.NewLine + "Disconnect");
-                mySerialPort.Close();
-            }
-            catch (Exception)
-            {
-                return false;
+                _mySerialPort.Write(Environment.NewLine + "Disconnect");
+                _mySerialPort.Close();
             }
             return true;
         }

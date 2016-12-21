@@ -10,14 +10,10 @@ namespace WpfTerminal.Enums
     {
         public const string Connect = "Connect";
         public const string Connect_succeded = "Connect Succesfully";
-
-        //BG - Connection failed
-        public const string Connect_Unsucceded = "Connection was not succeeded";
+        public const string Connect_Failed = "Connection failed";
         public const string Listening = "Listening...";
         public const string Disconnect_succeded = "Disconnect Succesfully";
-
-        //BG - Disconnection failed
-        public const string Disconnect_unsucceded = "Disconnect was not succeeded";
+        public const string Disconnect_failed = "Disconnect failed";
         public const string Disconnect = "Disconnect";
         public const string ClearLog = "Clear Log";
         public const string Exit= "Exit";

@@ -133,6 +133,7 @@ namespace WpfTerminal.ViewModels
             try
             {
                 _connectionHandler = new ConnectionHandler();
+                _connectionHandler.Init();
                 if (_connectionHandler.ConnectionSucceded == true)
                 {
                     WriteToLog(StringsText.Connect_succeded + Environment.NewLine + StringsText.Listening);
@@ -141,7 +142,7 @@ namespace WpfTerminal.ViewModels
                 }
                 else
                 {
-                    WriteToLog(StringsText.Connect_Unsucceded);
+                    WriteToLog(StringsText.Connect_Failed);
                     IsConnectionSucceded = false;
                 }
             }
@@ -191,7 +192,7 @@ namespace WpfTerminal.ViewModels
             }
             else
             {
-                WriteToLog(StringsText.Disconnect_unsucceded);
+                WriteToLog(StringsText.Disconnect_failed);
             }
         }
         private void ExportClicked(object obj)
@@ -285,10 +286,10 @@ namespace WpfTerminal.ViewModels
             if (isFromGUI)
             {
                 WriteToLog("GUI:" + logMessage);
-                _connectionHandler.WritToMusafonScreenFromGUI(TerminalGUIScreen);
+                _connectionHandler.WriteToMusafonScreenFromGUI(TerminalGUIScreen);
             }
             else
-                WriteToLog("Musafon:" + logMessage);
+                WriteToLog("Terminal:" + logMessage);
         }
         private void OnPropertyChange(string propertyName)
         {

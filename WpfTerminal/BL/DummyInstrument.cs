@@ -18,9 +18,19 @@ namespace WpfTerminal.BL
         Fine,
         Coarse
     }
-    class DummyInstrument
+    public class DummyInstrument
     {
-        List<string> GetM (string B)
+        //public Dictionary<Axis, int> Axis = new Dictionary<BL.Axis, int>();
+
+        private Dictionary<Axis,int> _axis;
+
+        public Dictionary<Axis,int> Axis
+        {
+            get { return _axis; }
+            set { _axis = value; }
+        }
+
+        public List<string> GetM (string B)
         { 
             var l = new List<string>();
             l.Add("M1");
@@ -30,7 +40,7 @@ namespace WpfTerminal.BL
             return l;
         }
 
-        List<string> GetB()
+        public List<string> GetB()
         {
             var l = new List<string>();
             l.Add("B1");
@@ -40,9 +50,15 @@ namespace WpfTerminal.BL
             return l;
         }
 
-       void Move(Axis axis, StepSize step, string M , string B)
+       public void Move(Dictionary<Axis, int> _newaxis, StepSize step, string M , string B)
         {
-            MessageBox.Show("Moved");
+            MessageBox.Show(
+                            "B= " + B + Environment.NewLine +
+                            "M= " + M + Environment.NewLine +
+                            "StepSizr= " + step + Environment.NewLine+
+                            "Axis.x= " +_newaxis[BL.Axis.X]+Environment.NewLine+
+                            "Axis.y= " + _newaxis[BL.Axis.Y]+Environment.NewLine
+                            );
         }
 
     }
