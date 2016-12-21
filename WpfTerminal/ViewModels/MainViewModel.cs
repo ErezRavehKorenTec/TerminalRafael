@@ -18,7 +18,7 @@ namespace WpfTerminal.ViewModels
         private String _logString = string.Empty;
         private String _terminalGUIString = string.Empty;
         private bool _isConnectionSucceded = false;
-        public readonly int _configStepSize;
+        //public readonly int _configStepSize;
         //private TerminalButtonClicked terminalScreen;
         private ConnectionHandler _connectionHandler;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -31,9 +31,9 @@ namespace WpfTerminal.ViewModels
         private ICommand _export;
         private ICommand _terminalGUIClicked;
         #endregion
-        
+
         #endregion
-        
+
         #region Properties
         public int StepSize { get; set; }
         public bool IsConnectionSucceded
@@ -52,11 +52,11 @@ namespace WpfTerminal.ViewModels
         #region ctor
         public MainViewModel()
         {
-            if (!int.TryParse(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalData)["StepSize"], out _configStepSize))
-                _configStepSize = 1;
+            //if (!int.TryParse(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalData)["StepSize"], out _configStepSize))
+            //    _configStepSize = 1;
             ConnectCommand = new RelayCommand(ConnectDevice);
             DisConnectCommand = new RelayCommand(DisonnectDevice);
-            ClearScreen = new RelayCommand(param => WriteToLog(string.Empty));
+            ClearLogScreen = new RelayCommand(param => WriteToLog(string.Empty));
             ExitCommand = new RelayCommand(ExitProgram);
             ExportClickCommand = new RelayCommand(ExportClicked);
             TerminalGUIClickCommand = new RelayCommand(TerminalClickedFromGUI);
@@ -109,7 +109,7 @@ namespace WpfTerminal.ViewModels
             set { _close = value; }
         }
 
-        public ICommand ClearScreen
+        public ICommand ClearLogScreen
         {
             get { return _clickClearScreen; }
             set { _clickClearScreen = value; }
@@ -137,8 +137,6 @@ namespace WpfTerminal.ViewModels
                 {
                     WriteToLog(StringsText.Connect_succeded + Environment.NewLine + StringsText.Listening);
                     _connectionHandler.TerminalClickRecive += new EventHandler(OnTerminalClicked);
-                    //if want to move button click from terminal to new class
-                    //terminalScreen = new TerminalButtonClicked(_connectionHandler);
                     IsConnectionSucceded = true;
                 }
                 else
@@ -161,12 +159,13 @@ namespace WpfTerminal.ViewModels
         //Update Phisical Terminal according to GUI pressing
         private void TerminalClickedFromGUI(object obj)
         {
-            TerminalClicked(obj, true);
+            GUITerminalClicked(obj, true);
         }
         //Update GUI according to phisical terminal click
         private void OnTerminalClicked(object sender, EventArgs e)
         {
-            TerminalClicked(sender, false);
+            WriteToLog("Termninal was clicked:"+Environment.NewLine+ sender.ToString());
+            TerminalGUIScreen = sender.ToString();
         }
         private void ExitProgram(object obj)
         {
@@ -204,7 +203,7 @@ namespace WpfTerminal.ViewModels
             LogText = obj;
         }
         //two way update of GUI/Terminal
-        private void TerminalClicked(object obj, bool isFromGUI)
+        private void GUITerminalClicked(object obj, bool isFromGUI)
         {
             string logMessage = string.Empty;
             switch (((string)obj).ToLower())
@@ -240,15 +239,13 @@ namespace WpfTerminal.ViewModels
                 case "s":
                     {
                         //if there was update by musafon we need to write it to GUI and update proper Step size
-                        if (_connectionHandler.TerminalStepSize > StepSize)
-                            StepSize = _connectionHandler.TerminalStepSize;
-                        //update GUI Step size only when GUI is Called method
-                        if (isFromGUI)
-                        {
-                            StepSize++;
-                        }
-                        //
-                        if (StepSize == _configStepSize)
+                        //if (_connectionHandler.TerminalStepSize > StepSize)
+                        //    StepSize = _connectionHandler.TerminalStepSize;
+                        ////update GUI Step size only when GUI is Called method
+                        //if (isFromGUI)
+                        //{
+                        //    StepSize++;
+                        if (StepSize == 5)
                             StepSize = 0;
                         if (StepSize == 0)
                         {
