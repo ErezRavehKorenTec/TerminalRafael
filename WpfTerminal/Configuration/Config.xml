@@ -2,7 +2,7 @@
 <root>
   <TerminalPreferences>
     <Field Name="IPAddress">127.0.0.1</Field>
-    <Field Name="Port">COM3</Field>
+    <Field Name="Port">COM4</Field>
     <Field Name="BaudRate">9600</Field><!--300,600,1200,2400,4800,9600,19200 -->
     <Field Name="Parity">None</Field><!--Even,odd,Mark,Space,None,Ignore-->
     <Field Name="StopBits">One</Field><!--1,2-->

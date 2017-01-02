@@ -33,6 +33,15 @@ namespace WpfTerminal.BL
             get { return _curserLine; }
             set { _curserLine = value; }
         }
+
+        private int _LastCurserLocation=4;
+
+        public int LastCurserLocation
+        {
+            get { return _LastCurserLocation; }
+            set { _LastCurserLocation= value; }
+        }
+
         public List<string> MSelection { get; set; }
         public List<string> BSelection { get; set; }
 
@@ -46,6 +55,7 @@ namespace WpfTerminal.BL
         public bool ConnectionSucceded { get; set; }
         public int TerminalStepSize { get; set; }
         public Dictionary<string, string> TerminalParameters { get; set; }
+        public bool IsConfirmed { get; private set; }
         #endregion
 
         #region ctor
@@ -67,9 +77,9 @@ namespace WpfTerminal.BL
         {
             try
             {
+                string[] _ports = SerialPort.GetPortNames();
                 TerminalParameters = Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalPreferences);
-
-                _mySerialPort = new SerialPort(TerminalParameters["Port"]);
+                _mySerialPort = new SerialPort(_ports.Contains(TerminalParameters["Port"]) == false?"COM1": TerminalParameters["Port"]);
                 _mySerialPort.BaudRate = Int16.Parse(TerminalParameters["BaudRate"]);
                 _mySerialPort.DataBits = Int16.Parse(TerminalParameters["DataBits"]);
 
@@ -133,30 +143,42 @@ namespace WpfTerminal.BL
             {
                 case "2":
                     {
-                        WriteToTerminalScreen(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalButtons)["2"]);
-                        test.Axis[Axis.Y]++;
-                        test.Move(test.Axis, SelectedStep, MSelection[_mIndex], BSelection[_bIndex]);
+                        if (IsConfirmed)
+                        {
+                            WriteToTerminalScreen(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalButtons)["2"]);
+                            test.Axis[Axis.Y]++;
+                            test.Move(test.Axis, SelectedStep, MSelection[_mIndex], BSelection[_bIndex]);
+                        }
                         break;
                     }
                 case "4":
                     {
-                        WriteToTerminalScreen(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalButtons)["4"]);
-                        test.Axis[Axis.X]--;
-                        test.Move(test.Axis, SelectedStep, MSelection[_mIndex], BSelection[_bIndex]);
+                        if (IsConfirmed)
+                        {
+                            WriteToTerminalScreen(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalButtons)["4"]);
+                            test.Axis[Axis.X]--;
+                            test.Move(test.Axis, SelectedStep, MSelection[_mIndex], BSelection[_bIndex]);
+                        }
                         break;
                     }
                 case "6":
                     {
-                        WriteToTerminalScreen(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalButtons)["6"]);
-                        test.Axis[Axis.X]++;
-                        test.Move(test.Axis, SelectedStep, MSelection[_mIndex], BSelection[_bIndex]);
+                        if (IsConfirmed)
+                        {
+                            WriteToTerminalScreen(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalButtons)["6"]);
+                            test.Axis[Axis.X]++;
+                            test.Move(test.Axis, SelectedStep, MSelection[_mIndex], BSelection[_bIndex]);
+                        }
                         break;
                     }
                 case "8":
                     {
-                        WriteToTerminalScreen(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalButtons)["8"]);
-                        test.Axis[Axis.Y]--;
-                        test.Move(test.Axis, SelectedStep, MSelection[_mIndex], BSelection[_bIndex]);
+                        if (IsConfirmed)
+                        {
+                            WriteToTerminalScreen(Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalButtons)["8"]);
+                            test.Axis[Axis.Y]--;
+                            test.Move(test.Axis, SelectedStep, MSelection[_mIndex], BSelection[_bIndex]);
+                        }
                         break;
                     }
                 //curser move on screen
@@ -203,10 +225,9 @@ namespace WpfTerminal.BL
                             else// (CurserLine > 1)
                             {
                                 CurserLine--;
-                                _mySerialPort.Write(new byte[] { 0x1B, 0x5B, 0x41 }, 0, 3);
+                                _mySerialPort.Write(MOVE_CURSER_UP, 0, 3);
                             }
-
-
+                            LastCurserLocation = CurserLine;
                             break;
 
                         }
@@ -216,18 +237,22 @@ namespace WpfTerminal.BL
                         {
                             switch (CurserLine)
                             {
+                                                
                                 case 1:
                                     {
+                                        LastCurserLocation = CurserLine;
                                         ChangeLineSelection(1, v == "b" ? "left" : "right");
                                         break;
                                     }
                                 case 2:
                                     {
+                                        LastCurserLocation = CurserLine;
                                         ChangeLineSelection(2, v == "b" ? "left" : "right");
                                         break;
                                     }
                                 case 3:
                                     {
+                                        LastCurserLocation = CurserLine;
                                         ChangeLineSelection(3, v == "b" ? "left" : "right");
                                         break;
                                     }
@@ -256,6 +281,7 @@ namespace WpfTerminal.BL
 
                         }
                 }
+
             }
         }
 
@@ -343,21 +369,53 @@ namespace WpfTerminal.BL
             if (input.Equals(string.Empty))
             {
                 value = FIRST_LINE_DISPLAY + BSelection[_bIndex].ToString() + Environment.NewLine + SECOND_LINE_DISPLAY + MSelection[_mIndex].ToString() + Environment.NewLine + THIRD_LINE_DISPLAY + SelectedStep.ToString() + Environment.NewLine + "Confirm ?";
+                CurserLine = 4;
                 _mySerialPort.Write(value);
+                AdjustCurserLocation();
+                IsConfirmed = false;
             }
             else if (input.ToLower().Equals("confirm"))
             {
                 value = FIRST_LINE_DISPLAY + BSelection[_bIndex].ToString() + Environment.NewLine + SECOND_LINE_DISPLAY + MSelection[_mIndex].ToString() + Environment.NewLine + THIRD_LINE_DISPLAY + SelectedStep.ToString() + Environment.NewLine;
                 _mySerialPort.Write(value);
+                CurserLine = 4;
+                IsConfirmed = true;
             }
             else
             {
                 value = FIRST_LINE_DISPLAY + BSelection[_bIndex].ToString() + Environment.NewLine + SECOND_LINE_DISPLAY + MSelection[_mIndex].ToString() + Environment.NewLine + THIRD_LINE_DISPLAY + SelectedStep.ToString() + Environment.NewLine + input;
                 _mySerialPort.Write(value);
             }
-            CurserLine = 4;
             if (TerminalClickRecive != null)
                 TerminalClickRecive(value, null);
+        }
+
+        private void AdjustCurserLocation()
+        {
+            switch (LastCurserLocation)
+            {
+                case 1:
+                    {
+                        MoveCursor("a");
+                        MoveCursor("a");
+                        MoveCursor("a");
+                        break;
+                    }
+                case 2:
+                    {
+                        MoveCursor("a");
+                        MoveCursor("a");
+                        break;
+                    }
+                case 3:
+                    {
+                        MoveCursor("a");
+                        break;
+                    }
+                default:
+                    break;
+            }
+
         }
 
         private void ClearScreen()
@@ -378,6 +436,7 @@ namespace WpfTerminal.BL
         {
             if (_mySerialPort.IsOpen)
             {
+                CurserLine = 4;
                 ClearScreen();
                 _mySerialPort.Write(Environment.NewLine + "Disconnect");
                 _mySerialPort.Close();

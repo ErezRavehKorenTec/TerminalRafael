@@ -75,7 +75,7 @@
                         Grid.Column="0" 
                         VerticalAlignment="Center" 
                         HorizontalAlignment="Center" 
-                        Command="{Binding ClearScreen}" 
+                        Command="{Binding ClearLogScreen}" 
                         IsEnabled="{Binding LogText,Converter={StaticResource DisableIfEmpty}}"
                         Content="{Binding Source={x:Static Enums:StringsText.ClearLog}}"/>
 

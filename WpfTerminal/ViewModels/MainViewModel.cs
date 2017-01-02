@@ -184,7 +184,8 @@ namespace WpfTerminal.ViewModels
         }
         private void DisonnectDevice(object obj)
         {
-            if (_connectionHandler.Disconnect())
+            
+            if (_connectionHandler!=null && _connectionHandler.Disconnect())
             {
                 WriteToLog(StringsText.Disconnect_succeded);
                 IsConnectionSucceded = false;
