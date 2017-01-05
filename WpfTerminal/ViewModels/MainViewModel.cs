@@ -185,7 +185,7 @@ namespace WpfTerminal.ViewModels
         private void DisonnectDevice(object obj)
         {
             
-            if (_connectionHandler!=null && _connectionHandler.Disconnect())
+            if (_connectionHandler!=null /*&& _connectionHandler.CloseConnection()*/)
             {
                 WriteToLog(StringsText.Disconnect_succeded);
                 IsConnectionSucceded = false;
@@ -284,13 +284,13 @@ namespace WpfTerminal.ViewModels
                     }
             }
 
-            if (isFromGUI)
-            {
-                WriteToLog("GUI:" + logMessage);
-                _connectionHandler.WriteToMusafonScreenFromGUI(TerminalGUIScreen);
-            }
-            else
-                WriteToLog("Terminal:" + logMessage);
+            //if (isFromGUI)
+            //{
+            //    WriteToLog("GUI:" + logMessage);
+            //    _connectionHandler.WriteToMusafonScreenFromGUI(TerminalGUIScreen);
+            //}
+            //else
+            //    WriteToLog("Terminal:" + logMessage);
         }
         private void OnPropertyChange(string propertyName)
         {

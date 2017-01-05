@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
 
 namespace WpfTerminal.BL
 {
@@ -52,13 +53,8 @@ namespace WpfTerminal.BL
 
        public void Move(Dictionary<Axis, int> _newaxis, StepSize step, string M , string B)
         {
-            MessageBox.Show(
-                            "B= " + B + Environment.NewLine +
-                            "M= " + M + Environment.NewLine +
-                            "StepSizr= " + step + Environment.NewLine+
-                            "Axis.x= " +_newaxis[BL.Axis.X]+Environment.NewLine+
-                            "Axis.y= " + _newaxis[BL.Axis.Y]+Environment.NewLine
-                            );
+            System.Windows.Forms.MessageBox.Show("B= " + B + Environment.NewLine +"M= " + M + Environment.NewLine +"StepSizr= " + step + Environment.NewLine +"Axis.x= " + _newaxis[BL.Axis.X] + Environment.NewLine +"Axis.y= " + _newaxis[BL.Axis.Y] + Environment.NewLine);
+
         }
 
     }

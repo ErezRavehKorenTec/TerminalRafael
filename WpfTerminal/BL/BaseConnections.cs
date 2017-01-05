@@ -2,27 +2,26 @@
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using WpfTerminal.Enums;
 
 namespace WpfTerminal.BL
 {
-    public class ConnectionHandler
+    public abstract class BaseConnections
     {
-        #region params
-
-
+        #region CONSTS
         public const string FIRST_LINE_DISPLAY = "B: ";
         public const string SECOND_LINE_DISPLAY = "M: ";
         public const string THIRD_LINE_DISPLAY = "Step: ";
-        private static readonly byte[] MOVE_CURSER_UP = new byte[] { 0x1B, 0x5B, 0x41 };
-        private static readonly byte[] MOVE_CURSER_DOWN = new byte[] { 0x1B, 0x5B, 0x42 };
-        public event EventHandler TerminalClickRecive;
-        DummyInstrument test;
         #endregion
+
+        public DummyInstrument test;
+        public static readonly byte[] MOVE_CURSER_UP = new byte[] { 0x1B, 0x5B, 0x41 };
+        public static readonly byte[] MOVE_CURSER_DOWN = new byte[] { 0x1B, 0x5B, 0x42 };
+        public event EventHandler TerminalClickRecive;
+        public int _bIndex = 0;
+        public int _mIndex = 0;
 
         #region Properties
 
@@ -54,38 +53,20 @@ namespace WpfTerminal.BL
         public bool ConnectionSucceded { get; set; }
         public int TerminalStepSize { get; set; }
         public Dictionary<string, string> TerminalParameters { get; set; }
-        public bool IsConfirmed { get; private set; }
+        public bool IsConfirmed { get; set; }
         #endregion
-        BaseConnections _baseConnection;
-        #region ctor
-        public ConnectionHandler() { }
-
-        #endregion
-
-        #region Methods
-        public void Init()
+        public virtual void WriteToTerminalScreen(string obj) { }
+        public virtual void ReciveData() { }
+        public abstract bool CloseConnection();
+        public BaseConnections()
         {
+            TerminalParameters = Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalPreferences);
             test = new DummyInstrument();
             BSelection = test.GetB();
             MSelection = test.GetM(BSelection.First());
             test.Axis = new Dictionary<Axis, int>() { { Axis.X, 0 }, { Axis.Y, 0 } };
-            TerminalParameters = Configuration.ConfigurationHolder.GetInstance().GetValue(ConfigurationParameter.TerminalPreferences);
-            if(TerminalParameters["ConnectionType"] == "IP")
-                _baseConnection = new TCP();
-            else if (TerminalParameters["ConnectionType"] == "RS232")
-                _baseConnection = new RS232();
-            //_baseConnection.CloseConnection();
+            
         }
 
-        //public void WriteToMusafonScreenFromGUI(string value)
-        //{
-        //    if (_mySerialPort != null && _mySerialPort.IsOpen)
-        //    {
-        //        _mySerialPort.Write(Environment.NewLine + value);
-        //    }
-        //}
-
-
-        #endregion 
     }
 }

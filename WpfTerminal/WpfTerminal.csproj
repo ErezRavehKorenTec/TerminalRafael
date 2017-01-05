@@ -95,7 +95,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="BL\BaseConnections.cs" />
     <Compile Include="BL\DummyInstrument.cs" />
+    <Compile Include="BL\RS232.cs" />
+    <Compile Include="BL\TCP.cs" />
     <Compile Include="BL\WriteToFile.cs" />
     <Compile Include="Configuration\ConfigurationHolder.cs" />
     <Compile Include="Converters\BolleanToVisability.cs" />
